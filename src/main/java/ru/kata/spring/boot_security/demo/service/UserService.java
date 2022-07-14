@@ -10,27 +10,26 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.UserDao;
+import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
-    private UserDao userDao;
+    private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     @Autowired
-    public UserService(UserDao userDao, @Lazy PasswordEncoder passwordEncoder) {
-        this.userDao = userDao;
+    public UserService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public User findByUsername(String username) {
-        return userDao.findByUsername(username);
+        return userRepository.findByUsername(username);
     }
 
     @Override
@@ -51,28 +50,28 @@ public class UserService implements UserDetailsService {
     }
 
     public List<User> findAll() {
-        return userDao.findAll();
+        return userRepository.findAll();
     }
 
     public void deleteById(Long id) {
-        userDao.deleteById(id);
+        userRepository.deleteById(id);
     }
 
     public User findById(Long id) {
-        return userDao.getOne(id);
+        return userRepository.getOne(id);
     }
 
     @Transactional
     public User registerNewAccount(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userDao.save(user);
+        return userRepository.save(user);
     }
 
     @Transactional
     public User editAccount(User user) {
-        if (!user.getPassword().equals(userDao.getById(user.getId()).getPassword())) {
+        if (!user.getPassword().equals(userRepository.getById(user.getId()).getPassword())) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        return userDao.save(user);
+        return userRepository.save(user);
     }
 }
